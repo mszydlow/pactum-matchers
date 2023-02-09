@@ -39,6 +39,13 @@ function oneOf(value) {
   };
 }
 
+function oneOfType(value) {
+  return {
+    value,
+    pactum_type: 'ONE_OF_TYPE'
+  };
+}
+
 function expression(value, expr) {
   if (typeof expr === 'undefined') {
     expr = value;
@@ -199,6 +206,7 @@ module.exports = {
   like,
   eachLike,
   oneOf,
+  oneOfType,
   expression,
   string,
   regex,

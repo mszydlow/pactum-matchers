@@ -1,6 +1,6 @@
 const suite = require('uvu').suite;
 const assert = require('uvu/assert');
-const { like, regex, oneOf, expression, gt, any, utils } = require('../src/index');
+const { string, int, float, like, regex, oneOf, oneOfType, expression, gt, any, utils } = require('../src/index');
 const { setMatchingRules, getValue, compare } = utils;
 
 const test = suite('Compare With Matchers');
@@ -283,6 +283,114 @@ test('expr - prop object fails', () => {
   const expected = getValue(value);
   const { message } = compare(actual, expected, rules, '$.body');
   assert.equal(message, `Json doesn't fulfil expression '$.body.age > 10'`);
+});
+
+test('oneOfType - root string', () => {
+  const actual = 'API';
+  const value = oneOfType([string(), int()]);
+  const rules = setMatchingRules({}, value, '$.body');
+  const expected = getValue(value);
+  const { message } = compare(actual, expected, rules, '$.body');
+  assert.equal(message, '');
+});
+
+test('oneOfType - root int', () => {
+  const actual = 123;
+  const value = oneOfType([int(), string()]);
+  const rules = setMatchingRules({}, value, '$.body');
+  const expected = getValue(value);
+  const { message } = compare(actual, expected, rules, '$.body');
+  assert.equal(message, '');
+});
+
+test('oneOfType - root float', () => {
+  const actual = 123.12;
+  const value = oneOfType([float(), string()]);
+  const rules = setMatchingRules({}, value, '$.body');
+  const expected = getValue(value);
+  const { message } = compare(actual, expected, rules, '$.body');
+  assert.equal(message, '');
+});
+
+test('oneOfType - root null', () => {
+  const actual = null;
+  const value = oneOfType([string(), null]);
+  const rules = setMatchingRules({}, value, '$.body');
+  const expected = getValue(value);
+  const { message } = compare(actual, expected, rules, '$.body');
+  assert.equal(message, '');
+});
+
+test('oneOfType - root []', () => {
+  const actual = [];
+  const value = oneOfType([[], int()]);
+  const rules = setMatchingRules({}, value, '$.body');
+  const expected = getValue(value);
+  const { message } = compare(actual, expected, rules, '$.body');
+  assert.equal(message, '');
+});
+
+test('oneOfType - root [string()]', () => {
+  const actual = ['API','MAPI'];
+  const value = oneOfType([[string()], null]);
+  const rules = setMatchingRules({}, value, '$.body');
+  const expected = getValue(value);
+  const { message } = compare(actual, expected, rules, '$.body');
+  assert.equal(message, '');
+});
+
+test('oneOfType - root [int()]', () => {
+  const actual = [321,123];
+  const value = oneOfType([[int()], null]);
+  const rules = setMatchingRules({}, value, '$.body');
+  const expected = getValue(value);
+  const { message } = compare(actual, expected, rules, '$.body');
+  assert.equal(message, '');
+});
+
+test('oneOfType - root value fails', () => {
+  const actual = null;
+  const value = oneOfType([string(), int()]);
+  const rules = setMatchingRules({}, value, '$.body');
+  const expected = getValue(value);
+  const { message } = compare(actual, expected, rules, '$.body');
+  assert.equal(message, `Json doesn't have one of the expected types at "$.body" but found "null" of type "null"`);
+});
+
+test('oneOfType - root value [] fails', () => {
+  const actual = [];
+  const value = oneOfType([string(), int()]);
+  const rules = setMatchingRules({}, value, '$.body');
+  const expected = getValue(value);
+  const { message } = compare(actual, expected, rules, '$.body');
+  assert.equal(message, `Json doesn't have one of the expected types at "$.body" but found "" of type "array"`);
+});
+
+test('oneOfType - root value ["API"] fails', () => {
+  const actual = ["API"];
+  const value = oneOfType([[], int()]);
+  const rules = setMatchingRules({}, value, '$.body');
+  const expected = getValue(value);
+  const { message } = compare(actual, expected, rules, '$.body');
+  assert.equal(message, `Json doesn't have one of the expected types at "$.body" but found "API" of type "array"`);
+});
+
+test('oneOfType - root value [123] fails', () => {
+  const actual = [123];
+  const value = oneOfType([string(), []]);
+  const rules = setMatchingRules({}, value, '$.body');
+  const expected = getValue(value);
+  const { message } = compare(actual, expected, rules, '$.body');
+  assert.equal(message, `Json doesn't have one of the expected types at "$.body" but found "123" of type "array"`);
+});
+
+test('oneOfType - root value [123] fails oneOfType([[string()], [float()]])', () => {
+  const actual = [123];
+  const value = oneOfType([[string()], [float()]]);
+  const rules = setMatchingRules({}, value, '$.body');
+  const expected = getValue(value);
+  const { message } = compare(actual, expected, rules, '$.body');
+  assert.equal(message, `Json doesn't have one of the expected types at "$.body" but found "123" of type "array"`);
 });
 
 test.run();

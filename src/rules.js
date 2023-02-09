@@ -11,6 +11,12 @@ function setMatchingRules(rules, data, path) {
     case 'ONE_OF':
       rules[path] = { match: 'oneOf', value: data.value };
       break;
+    case 'ONE_OF_TYPE':
+      rules[path] = { match: 'oneOfType', value: data.value };
+      if (isObject(data.value)) {
+        rules[`${path}[*].*`] = { match: 'oneOfType', value: data.value };
+      }
+      break;
     case 'EXPR':
       rules[path] = { match: 'expr', expr: data.expr };
       break;

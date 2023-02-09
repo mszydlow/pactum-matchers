@@ -21,6 +21,11 @@ export function eachLike(content: any, options?: EachLikeOptions): object;
 export function oneOf(value: any): object;
 
 /**
+ * oneOfType matching type
+ */
+export function oneOfType(value: any): object;
+
+/**
  * expression matching
  */
 export function expression(value: any, expr: string): object;
