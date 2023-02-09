@@ -85,6 +85,9 @@ function compareWithRule(actual, expected, rules, regex_rules, path, rule) {
     case 'oneOf':
       compareWithRuleOneOf(actual, rule, path);
       break;
+    case 'oneOfType':
+      compareWithRuleOneOfType(actual, rule, path, rules, regex_rules);
+      break;
     case 'expr':
       compareWithRuleExpr(actual, rule, path);
       break;
@@ -169,6 +172,53 @@ function compareWithRuleOneOf(actual, rule, path) {
   }
   if (!found) {
     throw `Json doesn't have one of the expected values at "${path}" but found "${actual}"`;
+  }
+}
+
+function compareWithRuleOneOfType(actual, rule, path, rules, regex_rules) {
+  const values = rule.value;
+  const actualType = getType(actual);
+  let found = false;
+
+  for (let i = 0; i < values.length; i++) {
+    var expected = values[i]
+    const expectedType = getType(expected);
+
+    found = actualType === expectedType && expectedType !== 'array' && expectedType !== 'object'
+
+    if (found) break;
+
+    if (expectedType === 'array') {
+      if (actual.length === 0 && expected.length === 0) {
+        found = true
+        if (found) break;
+      }
+      for (let j = 0; j < expected.length; j++) {
+        var actualArrayType = getType(actual[j])
+        var expectedArrayType = getType(expected[0])
+        try {
+          _compare(actualArrayType, expectedArrayType, rules, regex_rules, `${path}[${j}]`);
+          found = true;
+          if (found) break;
+        } catch (error) {
+          found = false
+        }
+      }
+    } else if (expectedType === 'object') {
+      try {
+        _compare(actualType, getType(expected.value), rules, regex_rules, `${path}.${expected.pactum_type.toLowerCase()}`)
+        found = true;
+        if (found) break;
+      } catch (error) {
+        found = false
+      }
+      if (found) break;
+    }
+    if (found) break;
+  }
+  
+  if (!found) {
+    throw `Json doesn't have one of the expected types at "${path}" but found "${actual}" of type "${actualType}"`;
   }
 }
 

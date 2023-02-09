@@ -4,6 +4,8 @@ function getValueFromMatcher(data) {
   switch (data.pactum_type) {
     case 'ONE_OF':
       return data.value[0];
+    case 'ONE_OF_TYPE':
+      return data.value[0];
     case 'ARRAY_LIKE':
       if (data.items && data.items.length > 0) {
         data.value = data.items;
